@@ -25,9 +25,10 @@ class OrderControllerIntegrationTest extends BaseIntegrationTest {
     @BeforeEach
     void setUpAuth() {
         // Register and login
+        String uniqueEmail = "orderadmin+" + System.nanoTime() + "@test.com";
         RegisterRequest registerRequest = new RegisterRequest(
                 "Order Admin",
-                "orderadmin@test.com",
+                uniqueEmail,
                 "password123"
         );
         ResponseEntity<UserResponse> registerResponse = restTemplate.postForEntity(
@@ -37,7 +38,7 @@ class OrderControllerIntegrationTest extends BaseIntegrationTest {
         );
         testUserId = registerResponse.getBody().getId();
 
-        LoginRequest loginRequest = new LoginRequest("orderadmin@test.com", "password123");
+        LoginRequest loginRequest = new LoginRequest(uniqueEmail, "password123");
         ResponseEntity<JwtResponse> loginResponse = restTemplate.postForEntity(
                 baseUrl + "/api/auth/login",
                 loginRequest,
