@@ -1,7 +1,7 @@
 # Implementation Plan: Order Processing System REST API (Part 1)
 
 ## Overview
-Build a complete Spring Boot 4.0.0 REST API with JWT authentication, PostgreSQL database, and comprehensive testing.
+Build a complete Spring Boot 3.4.0 REST API with JWT authentication, PostgreSQL database, and comprehensive testing.
 
 **Technology Stack (User-Approved):**
 - DB Migration: Flyway
@@ -22,8 +22,8 @@ Build a complete Spring Boot 4.0.0 REST API with JWT authentication, PostgreSQL 
 - Flyway Core + PostgreSQL adapter
 - JJWT (0.12.5): api, impl, jackson
 - Lombok
-- Springdoc OpenAPI (2.6.0) for Swagger
-- Testcontainers (PostgreSQL, JUnit Jupiter) for testing
+- Springdoc OpenAPI (2.8.14) for Swagger
+- H2 Database (test scope) for integration testing
 
 **Critical File:** `/Users/martin/Workspace/ai_coderama/zadanie-riesenie/ai/pom.xml`
 
@@ -248,9 +248,9 @@ Build a complete Spring Boot 4.0.0 REST API with JWT authentication, PostgreSQL 
 
 **Create test base:** `src/test/java/sk/coderama/ai/BaseIntegrationTest.java`
 - @SpringBootTest with RANDOM_PORT
-- @Testcontainers with PostgreSQL container
-- @DynamicPropertySource for test database config
+- @ActiveProfiles("test") to use H2 test database
 - Inject TestRestTemplate and JwtTokenProvider
+- Test configuration uses H2 in-memory database with PostgreSQL compatibility mode
 
 **Create test files:**
 
@@ -282,6 +282,9 @@ Build a complete Spring Boot 4.0.0 REST API with JWT authentication, PostgreSQL 
    - Invalid token handling
 
 **Test configuration:** Create `src/test/resources/application-test.properties`
+- Configure H2 database with PostgreSQL compatibility mode
+- Enable Flyway for test migrations
+- Configure JWT settings for testing
 
 ### Phase 12: Documentation ✅ COMPLETED
 

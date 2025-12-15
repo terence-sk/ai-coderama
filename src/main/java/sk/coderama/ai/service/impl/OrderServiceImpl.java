@@ -1,6 +1,8 @@
 package sk.coderama.ai.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sk.coderama.ai.dto.request.CreateOrderRequest;
@@ -11,6 +13,9 @@ import sk.coderama.ai.dto.response.OrderResponse;
 import sk.coderama.ai.entity.Order;
 import sk.coderama.ai.entity.OrderItem;
 import sk.coderama.ai.entity.Product;
+import sk.coderama.ai.event.OrderCreatedEvent;
+import sk.coderama.ai.event.OrderEvent;
+import sk.coderama.ai.event.internal.OrderCreatedInternalEvent;
 import sk.coderama.ai.exception.ResourceNotFoundException;
 import sk.coderama.ai.repository.OrderRepository;
 import sk.coderama.ai.repository.ProductRepository;
@@ -18,10 +23,12 @@ import sk.coderama.ai.repository.UserRepository;
 import sk.coderama.ai.service.OrderService;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
@@ -29,6 +36,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
     public List<OrderResponse> getAllOrders() {
@@ -88,6 +96,30 @@ public class OrderServiceImpl implements OrderService {
         order.setTotal(calculatedTotal);
 
         Order savedOrder = orderRepository.save(order);
+
+        // Publish OrderCreated event (will be sent to RabbitMQ after transaction commits)
+        OrderCreatedEvent orderCreatedEvent = OrderCreatedEvent.builder()
+            .eventId(OrderEvent.generateEventId())
+            .orderId(savedOrder.getId())
+            .userId(savedOrder.getUserId())
+            .total(savedOrder.getTotal())
+            .status(savedOrder.getStatus())
+            .timestamp(LocalDateTime.now())
+            .items(savedOrder.getItems().stream()
+                .map(item -> OrderCreatedEvent.OrderItemDto.builder()
+                    .productId(item.getProductId())
+                    .quantity(item.getQuantity())
+                    .price(item.getPrice())
+                    .build())
+                .collect(Collectors.toList()))
+            .build();
+
+        applicationEventPublisher.publishEvent(
+            new OrderCreatedInternalEvent(this, orderCreatedEvent));
+
+        log.info("OrderCreatedEvent queued for order {} (will publish after commit)",
+            savedOrder.getId());
+
         return mapToResponse(savedOrder);
     }
 

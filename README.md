@@ -1,6 +1,6 @@
 # Order Processing System REST API
 
-A complete Spring Boot 4.0.0 REST API with JWT authentication, PostgreSQL database, and comprehensive testing for managing users, products, and orders.
+A complete Spring Boot 3.4.0 REST API with JWT authentication, PostgreSQL database, and comprehensive testing for managing users, products, and orders.
 
 ## Table of Contents
 
@@ -25,21 +25,21 @@ This is a RESTful API system for order processing that provides:
 - Product catalog management
 - Order processing with order items
 - Comprehensive error handling and validation
-- Integration tests using Testcontainers
+- Integration tests using H2 in-memory database
 - API documentation with Swagger/OpenAPI
 
 ## Technologies Used
 
 - **Java 21** - Programming language
-- **Spring Boot 4.0.0** - Application framework
+- **Spring Boot 3.4.0** - Application framework
 - **Spring Security** - Authentication and authorization
 - **Spring Data JPA** - Data access layer
-- **PostgreSQL 16** - Database
+- **PostgreSQL 16** - Production database
+- **H2 Database** - In-memory database for testing (PostgreSQL compatibility mode)
 - **Flyway** - Database migrations
 - **JWT (jjwt 0.12.5)** - Token-based authentication
 - **Lombok** - Boilerplate code reduction
-- **Springdoc OpenAPI 2.6.0** - API documentation (Swagger UI)
-- **Testcontainers** - Integration testing with PostgreSQL
+- **Springdoc OpenAPI 2.8.14** - API documentation (Swagger UI)
 - **BCrypt** - Password hashing
 - **Docker** - Database containerization
 - **Maven** - Build and dependency management
@@ -220,7 +220,7 @@ curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
 
 ## Running Tests
 
-The project includes comprehensive integration tests using Testcontainers.
+The project includes comprehensive integration tests using H2 in-memory database in PostgreSQL compatibility mode.
 
 ### Run All Tests
 
@@ -238,7 +238,7 @@ The project includes comprehensive integration tests using Testcontainers.
 
 **Total:** 38+ integration tests
 
-**Note:** Tests automatically start a PostgreSQL container using Testcontainers. Docker must be running.
+**Note:** Tests use H2 in-memory database configured with PostgreSQL compatibility mode. Flyway migrations run automatically during test execution.
 
 ## Sample API Requests
 
@@ -406,14 +406,6 @@ curl -X PUT http://localhost:8080/api/orders/1 \
 **Solution:**
 - Login again to get a new token (tokens expire after 24 hours)
 
-### Tests Failing - Docker Not Running
-
-**Problem:** Integration tests fail with Testcontainers errors
-
-**Solution:**
-- Ensure Docker is running before executing tests
-- Testcontainers requires Docker to start PostgreSQL containers
-
 ### Build Failures
 
 **Problem:** Maven build fails
@@ -489,4 +481,4 @@ curl -X PUT http://localhost:8080/api/orders/1 \
 
 ---
 
-**Developed with Spring Boot 4.0.0 | PostgreSQL 16 | JWT Authentication**
+**Developed with Spring Boot 3.4.0 | PostgreSQL 16 | JWT Authentication | H2 Test Database**
